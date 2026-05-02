@@ -52,6 +52,25 @@ print(df['target'].value_counts())
 
 import random
 
+def gerar_amostras_empate(n=200):
+    # O dataset original contém apenas 16 empates reais, insuficiente para balancear.
+    # Esta função gera tabuleiros sintéticos de empate para atingir n amostras.
+    amostras = []
+    while len(amostras) < n:
+        # Um tabuleiro de empate sempre tem 9 casas preenchidas: 5 jogadas de 'x' e 4 de 'o'
+        # (x sempre começa, logo faz uma jogada a mais)
+        tabuleiro = ['x'] * 5 + ['o'] * 4
+        # Embaralha para simular distribuições aleatórias de jogadas no tabuleiro
+        random.shuffle(tabuleiro)
+        # Converte para pd.Series no mesmo formato esperado por identificar_vitoria
+        row_temp = pd.Series(tabuleiro + ['negative'], index=colunas)
+        # Só aceita o tabuleiro se nenhum jogador venceu (empate de fato)
+        if identificar_vitoria(row_temp) == 'Empate':
+            # Converte os símbolos para valores numéricos (x→1, o→-1) e adiciona a classe 3
+            tab_num = [mapeamento_tabuleiro[c] for c in tabuleiro]
+            amostras.append(tab_num + [3])
+    return pd.DataFrame(amostras, columns=colunas[:-1] + ['target_num'])
+
 def gerar_amostras_tem_jogo(n=200):
     amostras_tem_jogo = []
     while len(amostras_tem_jogo) < n:
@@ -76,7 +95,7 @@ def gerar_amostras_tem_jogo(n=200):
 # 1. Separar as classes e fazer o shuffle
 df_x = df[df['target_num'] == 1].sample(n=200, random_state=42)
 df_o = df[df['target_num'] == 2].sample(n=200, random_state=42)
-df_empate = df[df['target_num'] == 3] # Pegamos os 16 que existem
+df_empate = gerar_amostras_empate(200)
 
 # 2. Gerar as amostras de "Tem jogo"
 df_tem_jogo = gerar_amostras_tem_jogo(200)
