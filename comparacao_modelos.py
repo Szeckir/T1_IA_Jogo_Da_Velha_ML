@@ -1,30 +1,31 @@
 import pandas as pd
 import numpy as np
 import pickle
-import os
 import matplotlib.pyplot as plt
 from sklearn.metrics import (accuracy_score, precision_score, recall_score,
                              f1_score, confusion_matrix, ConfusionMatrixDisplay)
 
-X_test = pd.read_csv('X_test.csv')
-y_test = pd.read_csv('y_test.csv').values.ravel()
+from project_paths import DATASET_DIR, MODELS_DIR, RESULTS_DIR, ROOT_DIR
+
+X_test = pd.read_csv(DATASET_DIR / 'X_test.csv')
+y_test = pd.read_csv(DATASET_DIR / 'y_test.csv').values.ravel()
 
 CLASS_NAMES = ['Tem jogo', 'X venceu', 'O venceu', 'Empate']
 
 MODELOS = {
-    'k-NN':          'models/knn_model.pkl',
-    'MLP':           'models/mlp_model.pkl',
-    'Árvore':        'models/arvore_model.pkl',
-    'Random Forest': 'models/random_forest_model.pkl',
-    'SVM':           'models/svm_model.pkl',
+    'k-NN':          MODELS_DIR / 'knn_model.pkl',
+    'MLP':           MODELS_DIR / 'mlp_model.pkl',
+    'Árvore':        MODELS_DIR / 'arvore_model.pkl',
+    'Random Forest': MODELS_DIR / 'random_forest_model.pkl',
+    'SVM':           MODELS_DIR / 'svm_model.pkl',
 }
 
 resultados = []
 predicoes = {}
 
 for nome, caminho in MODELOS.items():
-    if not os.path.exists(caminho):
-        print(f"[AVISO] Modelo não encontrado: {caminho} — rode o script correspondente primeiro.")
+    if not caminho.exists():
+        print(f"[AVISO] Modelo não encontrado: {caminho.relative_to(ROOT_DIR)} — rode o script correspondente primeiro.")
         continue
     with open(caminho, 'rb') as f:
         modelo = pickle.load(f)
@@ -49,8 +50,8 @@ print(df.to_string(float_format='%.4f'))
 melhor = df['F1-Score'].idxmax()
 print(f"\nMelhor modelo por F1-Score: {melhor} ({df.loc[melhor, 'F1-Score']:.4f})")
 
-os.makedirs('results', exist_ok=True)
-df.to_csv('results/comparacao_modelos.csv', float_format='%.4f')
+RESULTS_DIR.mkdir(exist_ok=True)
+df.to_csv(RESULTS_DIR / 'comparacao_modelos.csv', float_format='%.4f')
 
 # --- Gráfico de barras: comparação de métricas ---
 metricas = ['Acurácia', 'Precision', 'Recall', 'F1-Score']
@@ -71,7 +72,7 @@ ax.set_xticklabels(metricas)
 ax.legend(loc='lower right')
 ax.grid(axis='y', alpha=0.3)
 plt.tight_layout()
-plt.savefig('results/comparacao_metricas.png', dpi=150)
+plt.savefig(RESULTS_DIR / 'comparacao_metricas.png', dpi=150)
 plt.show()
 
 # --- Matrizes de confusão ---
@@ -88,7 +89,7 @@ for ax, (nome, y_pred) in zip(axes, predicoes.items()):
 
 plt.suptitle('Matrizes de Confusão — Conjunto de Teste', fontsize=14, y=1.02)
 plt.tight_layout()
-plt.savefig('results/matrizes_confusao.png', dpi=150, bbox_inches='tight')
+plt.savefig(RESULTS_DIR / 'matrizes_confusao.png', dpi=150, bbox_inches='tight')
 plt.show()
 
 print("\nArquivos salvos em results/:")

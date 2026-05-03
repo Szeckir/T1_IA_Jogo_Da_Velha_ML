@@ -9,28 +9,30 @@ pip3 install numpy pandas scikit-learn matplotlib
 ## Estrutura do projeto
 
 ```
-T1_IA_Jogo_Da_Velha_ML/
+Trabalho_IA/
 │
 ├── tic-tac-toe.data          # Dataset original (UCI)
 ├── tic-tac-toe.names         # Descrição do dataset original
 │
 ├── pre_processamento.py      # Etapa 1 — gera dataset_processado.csv
 ├── divisao_dados.py          # Etapa 2 — gera X/y train/test
-│
-├── dataset_processado.csv    # Dataset balanceado (616 amostras, 4 classes)
-├── X_train.csv               # Features de treino  (492 amostras)
-├── X_test.csv                # Features de teste   (124 amostras)
-├── y_train.csv               # Labels de treino
-├── y_test.csv                # Labels de teste
-│
-├── knn_model.py              # Etapa 3a — treina k-NN
-├── mlp_model.py              # Etapa 3b — treina MLP
-├── arvore_model.py           # Etapa 3c — treina Árvore de Decisão
-├── random_forest_model.py    # Etapa 3d — treina Random Forest
-├── svm_model.py              # Etapa 3e — treina SVM
-│
 ├── comparacao_modelos.py     # Etapa 4 — compara os 5 modelos
 ├── front_end.py              # Etapa 5 — jogo interativo com IA
+├── project_paths.py          # Caminhos compartilhados do projeto
+│
+├── algoritmos/
+│   ├── knn_model.py          # Etapa 3a — treina k-NN
+│   ├── mlp_model.py          # Etapa 3b — treina MLP
+│   ├── arvore_model.py       # Etapa 3c — treina Árvore de Decisão
+│   ├── random_forest_model.py # Etapa 3d — treina Random Forest
+│   └── svm_model.py          # Etapa 3e — treina SVM
+│
+├── dataset/
+│   ├── dataset_processado.csv # Dataset balanceado (800 amostras, 4 classes)
+│   ├── X_train.csv            # Features de treino
+│   ├── X_test.csv             # Features de teste
+│   ├── y_train.csv            # Labels de treino
+│   └── y_test.csv             # Labels de teste
 │
 ├── models/                   # Modelos treinados (.pkl)
 └── results/                  # Gráficos e tabela de comparação
@@ -48,7 +50,7 @@ Lê o dataset original da UCI, cria as 4 classes e gera um dataset balanceado.
 python3 pre_processamento.py
 ```
 
-**Saída:** `dataset_processado.csv`
+**Saída:** `dataset/dataset_processado.csv`
 
 ### Etapa 2 — Divisão dos dados
 
@@ -58,18 +60,18 @@ Divide o dataset em treino (80%) e teste (20%) com estratificação e `random_st
 python3 divisao_dados.py
 ```
 
-**Saída:** `X_train.csv`, `X_test.csv`, `y_train.csv`, `y_test.csv`
+**Saída:** `dataset/X_train.csv`, `dataset/X_test.csv`, `dataset/y_train.csv`, `dataset/y_test.csv`
 
 ### Etapa 3 — Treinar os modelos
 
 Cada script realiza GridSearchCV com validação cruzada 5-fold e salva o melhor modelo.
 
 ```bash
-python3 knn_model.py
-python3 mlp_model.py
-python3 arvore_model.py
-python3 random_forest_model.py
-python3 svm_model.py
+python3 algoritmos/knn_model.py
+python3 algoritmos/mlp_model.py
+python3 algoritmos/arvore_model.py
+python3 algoritmos/random_forest_model.py
+python3 algoritmos/svm_model.py
 ```
 
 **Saída:** arquivos `.pkl` na pasta `models/`
@@ -134,11 +136,11 @@ python3 front_end.py
 ```
 1. python3 pre_processamento.py
 2. python3 divisao_dados.py
-3. python3 knn_model.py
-   python3 mlp_model.py
-   python3 arvore_model.py
-   python3 random_forest_model.py
-   python3 svm_model.py
+3. python3 algoritmos/knn_model.py
+   python3 algoritmos/mlp_model.py
+   python3 algoritmos/arvore_model.py
+   python3 algoritmos/random_forest_model.py
+   python3 algoritmos/svm_model.py
 4. python3 comparacao_modelos.py
 5. python3 front_end.py
 ```

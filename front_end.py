@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 import pickle
-import os
+
+from project_paths import MODELS_DIR
 
 COLUNAS = [
     'canto_superior_esquerdo', 'canto_superior_centro', 'canto_superior_direito',
@@ -47,22 +48,22 @@ def classificar(modelo, tabuleiro):
 
 def escolher_modelo():
     opcoes = {
-        '1': ('k-NN',          'models/knn_model.pkl'),
-        '2': ('MLP',           'models/mlp_model.pkl'),
-        '3': ('Arvore',        'models/arvore_model.pkl'),
-        '4': ('Random Forest', 'models/random_forest_model.pkl'),
-        '5': ('SVM',           'models/svm_model.pkl'),
+        '1': ('k-NN',          MODELS_DIR / 'knn_model.pkl'),
+        '2': ('MLP',           MODELS_DIR / 'mlp_model.pkl'),
+        '3': ('Arvore',        MODELS_DIR / 'arvore_model.pkl'),
+        '4': ('Random Forest', MODELS_DIR / 'random_forest_model.pkl'),
+        '5': ('SVM',           MODELS_DIR / 'svm_model.pkl'),
     }
     print("\nEscolha o modelo de IA:")
     for k, (nome, path) in opcoes.items():
-        status = "disponivel" if os.path.exists(path) else "nao treinado"
+        status = "disponivel" if path.exists() else "nao treinado"
         print(f"  {k}. {nome:15s} [{status}]")
 
     while True:
         escolha = input("\nOpcao: ").strip()
         if escolha in opcoes:
             nome, path = opcoes[escolha]
-            if not os.path.exists(path):
+            if not path.exists():
                 print(f"  Modelo '{nome}' nao encontrado. Rode o script de treino primeiro.")
                 continue
             with open(path, 'rb') as f:

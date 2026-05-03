@@ -1,5 +1,7 @@
 import pandas as pd
 
+from project_paths import DATASET_DIR, RAW_DATA_FILE
+
 # Nomes das colunas conforme a posição no tabuleiro 3x3
 colunas = [
     'canto_superior_esquerdo', 'canto_superior_centro', 'canto_superior_direito',
@@ -8,7 +10,7 @@ colunas = [
     'class'
 ]
 
-df = pd.read_csv('tic-tac-toe.data', names=colunas)
+df = pd.read_csv(RAW_DATA_FILE, names=colunas)
 
 def identificar_vitoria(row):
     # Combinações de vitória (índices das colunas)
@@ -106,7 +108,8 @@ df_final = pd.concat([df_x, df_o, df_empate, df_tem_jogo], ignore_index=True)
 # 4. Salvar para usar nos modelos
 # Remover as colunas de texto e ficar só com as numéricas
 df_final = df_final[colunas[:-1] + ['target_num']]
-df_final.to_csv('dataset_processado.csv', index=False)
+DATASET_DIR.mkdir(exist_ok=True)
+df_final.to_csv(DATASET_DIR / 'dataset_processado.csv', index=False)
 
 print("Dataset final salvo com sucesso!")
 print(df_final['target_num'].value_counts())
