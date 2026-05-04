@@ -12,26 +12,22 @@ colunas = [
 
 df = pd.read_csv(RAW_DATA_FILE, names=colunas)
 
+COMBOS = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6]
+]
+
 def identificar_vitoria(row):
-    # Combinações de vitória (índices das colunas)
-    combos = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8], # Linhas
-        [0, 3, 6], [1, 4, 7], [2, 5, 8], # Colunas
-        [0, 4, 8], [2, 4, 6]             # Diagonais
-    ]
-    
-    # Se era 'positive', X ganhou
-    if row['class'] == 'positive':
-        return 'X venceu'
-    
-    # Se era 'negative', precisamos checar se 'o' ganhou
-    tabuleiro = row.iloc[:9].values
-    for c in combos:
+    tabuleiro = list(row.iloc[:9].values)
+    for c in COMBOS:
+        if tabuleiro[c[0]] == tabuleiro[c[1]] == tabuleiro[c[2]] == 'x':
+            return 'X venceu'
         if tabuleiro[c[0]] == tabuleiro[c[1]] == tabuleiro[c[2]] == 'o':
             return 'O venceu'
-            
-    # Se não era positivo e 'o' não ganhou, é empate
-    return 'Empate'
+    if 'b' not in tabuleiro:
+        return 'Empate'
+    return 'Tem jogo'
 
 # Aplicar a função para criar a nova coluna de classe
 df['target'] = df.apply(identificar_vitoria, axis=1)
@@ -87,10 +83,9 @@ def gerar_amostras_tem_jogo(n=200):
             
         # Criar um DataFrame temporário para usar a função de checagem
         row_temp = pd.Series(tabuleiro + ['negative'], index=colunas)
-        if identificar_vitoria(row_temp) == 'Empate': # Se não deu vitória de ninguém
-            # Converter para numérico e adicionar
+        if identificar_vitoria(row_temp) == 'Tem jogo':
             tab_num = [mapeamento_tabuleiro[c] for c in tabuleiro]
-            amostras_tem_jogo.append(tab_num + [0]) # 0 é a classe 'Tem jogo'
+            amostras_tem_jogo.append(tab_num + [0])
             
     return pd.DataFrame(amostras_tem_jogo, columns=colunas[:-1] + ['target_num'])
 

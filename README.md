@@ -1,41 +1,44 @@
 # T1 — Jogo da Velha com ML
 
+Sistema de IA para classificar estados do tabuleiro do jogo da velha em 4 classes:
+**Tem jogo**, **X venceu**, **O venceu**, **Empate**.
+
+---
+
 ## Dependências
 
 ```bash
 pip3 install numpy pandas scikit-learn matplotlib
 ```
 
+---
+
 ## Estrutura do projeto
 
 ```
-Trabalho_IA/
+T1_IA_Jogo_Da_Velha_ML/
 │
-├── tic-tac-toe.data          # Dataset original (UCI)
+├── project_paths.py          # Centraliza os caminhos de pastas
+│
+├── tic-tac-toe.data          # Dataset original (UCI) — necessário para rodar
 ├── tic-tac-toe.names         # Descrição do dataset original
 │
 ├── pre_processamento.py      # Etapa 1 — gera dataset_processado.csv
 ├── divisao_dados.py          # Etapa 2 — gera X/y train/test
-├── comparacao_modelos.py     # Etapa 4 — compara os 5 modelos
-├── front_end.py              # Etapa 5 — jogo interativo com IA
-├── project_paths.py          # Caminhos compartilhados do projeto
 │
 ├── algoritmos/
 │   ├── knn_model.py          # Etapa 3a — treina k-NN
 │   ├── mlp_model.py          # Etapa 3b — treina MLP
 │   ├── arvore_model.py       # Etapa 3c — treina Árvore de Decisão
-│   ├── random_forest_model.py # Etapa 3d — treina Random Forest
+│   ├── random_forest_model.py# Etapa 3d — treina Random Forest
 │   └── svm_model.py          # Etapa 3e — treina SVM
 │
-├── dataset/
-│   ├── dataset_processado.csv # Dataset balanceado (800 amostras, 4 classes)
-│   ├── X_train.csv            # Features de treino
-│   ├── X_test.csv             # Features de teste
-│   ├── y_train.csv            # Labels de treino
-│   └── y_test.csv             # Labels de teste
+├── comparacao_modelos.py     # Etapa 4 — compara os 5 modelos
+├── front_end.py              # Etapa 5 — jogo interativo com IA
 │
-├── models/                   # Modelos treinados (.pkl)
-└── results/                  # Gráficos e tabela de comparação
+├── dataset/                  # Gerado automaticamente (CSVs de treino/teste)
+├── models/                   # Gerado automaticamente (modelos .pkl)
+└── results/                  # Gerado automaticamente (gráficos e tabela)
 ```
 
 ---
@@ -52,6 +55,12 @@ python3 pre_processamento.py
 
 **Saída:** `dataset/dataset_processado.csv`
 
+> **Nota sobre a classe Empate:** O jogo da velha possui poucas posições de empate
+> possíveis. Por isso essa classe tem menos amostras naturais — o script gera amostras
+> sintéticas válidas para compensar. As outras classes têm 200 amostras cada.
+
+---
+
 ### Etapa 2 — Divisão dos dados
 
 Divide o dataset em treino (80%) e teste (20%) com estratificação e `random_state=42`.
@@ -61,6 +70,8 @@ python3 divisao_dados.py
 ```
 
 **Saída:** `dataset/X_train.csv`, `dataset/X_test.csv`, `dataset/y_train.csv`, `dataset/y_test.csv`
+
+---
 
 ### Etapa 3 — Treinar os modelos
 
@@ -74,24 +85,31 @@ python3 algoritmos/random_forest_model.py
 python3 algoritmos/svm_model.py
 ```
 
+Ou tudo de uma vez:
+
+```bash
+python3 algoritmos/knn_model.py && python3 algoritmos/mlp_model.py && python3 algoritmos/arvore_model.py && python3 algoritmos/random_forest_model.py && python3 algoritmos/svm_model.py
+```
+
 **Saída:** arquivos `.pkl` na pasta `models/`
 
 #### Hiperparâmetros testados por algoritmo
 
-| Algoritmo     | Hiperparâmetros                                                                                          | Combinações |
-| ------------- | -------------------------------------------------------------------------------------------------------- | ----------- |
-| k-NN          | k=[1,3,5,7,9,11,13,15], weights=[uniform,distance], metric=[euclidean,manhattan,minkowski]               | 48          |
-| MLP           | hidden_layer_sizes=[(50),(100),(50,50),(100,50)], activation=[relu,tanh], alpha=[0.0001,0.001,0.01]      | 24          |
-| Árvore        | criterion=[gini,entropy], max_depth=[None,5,10,20], min_samples_split=[2,5,10], min_samples_leaf=[1,2,4] | 72          |
-| Random Forest | n_estimators=[50,100,200], criterion=[gini,entropy], max_depth=[None,5,10], min_samples_split=[2,5]      | 36          |
-| SVM           | C=[0.1,1,10,100], kernel=[linear,rbf,poly], gamma=[scale,auto]                                           | 24          |
+| Algoritmo | Hiperparâmetros | Combinações |
+|---|---|---|
+| k-NN | k=[1,3,5,7,9,11,13,15], weights=[uniform,distance], metric=[euclidean,manhattan,minkowski] | 48 |
+| MLP | hidden_layer_sizes=[(50),(100),(50,50),(100,50)], activation=[relu,tanh], alpha=[0.0001,0.001,0.01] | 24 |
+| Árvore | criterion=[gini,entropy], max_depth=[None,5,10,20], min_samples_split=[2,5,10], min_samples_leaf=[1,2,4] | 72 |
+| Random Forest | n_estimators=[50,100,200], criterion=[gini,entropy], max_depth=[None,5,10], min_samples_split=[2,5] | 36 |
+| SVM | C=[0.1,1,10,100], kernel=[linear,rbf,poly], gamma=[scale,auto] | 24 |
 
 Cada script imprime no terminal:
-
 - Melhores hiperparâmetros encontrados
 - Acurácia na validação cruzada
 - Acurácia, precision, recall e F1-score no conjunto de teste
 - Matriz de confusão
+
+---
 
 ### Etapa 4 — Comparação dos modelos
 
@@ -102,7 +120,6 @@ python3 comparacao_modelos.py
 ```
 
 **Saída em `results/`:**
-
 - `comparacao_modelos.csv` — tabela com accuracy, precision, recall e F1 dos 5 modelos
 - `comparacao_metricas.png` — gráfico de barras comparando as 4 métricas
 - `matrizes_confusao.png` — matrizes de confusão dos 5 modelos lado a lado
@@ -116,7 +133,6 @@ python3 comparacao_modelos.py
 Jogo da velha no terminal: **humano (X)** vs. **computador aleatório (O)**.
 
 A cada jogada, o modelo de IA escolhido classifica o estado do tabuleiro e o sistema:
-
 - Exibe o estado real e a predição da IA
 - Indica se a IA acertou ou errou
 - Mostra a acurácia acumulada da IA durante a partida
@@ -149,19 +165,17 @@ python3 front_end.py
 
 ## Classes do dataset
 
-| Código | Classe   | Descrição                                     |
-| ------ | -------- | --------------------------------------------- |
-| 0      | Tem jogo | Jogo em andamento                             |
-| 1      | X venceu | Jogador X completou uma linha/coluna/diagonal |
-| 2      | O venceu | Jogador O completou uma linha/coluna/diagonal |
-| 3      | Empate   | Tabuleiro cheio sem vencedor                  |
+| Código | Classe | Descrição |
+|---|---|---|
+| 0 | Tem jogo | Jogo em andamento |
+| 1 | X venceu | Jogador X completou uma linha/coluna/diagonal |
+| 2 | O venceu | Jogador O completou uma linha/coluna/diagonal |
+| 3 | Empate | Tabuleiro cheio sem vencedor |
 
 ## Representação do tabuleiro
 
-Cada posição do tabuleiro é mapeada para um valor numérico:
-
-| Símbolo   | Valor |
-| --------- | ----- |
-| X         | 1     |
-| O         | -1    |
-| vazio (b) | 0     |
+| Símbolo | Valor |
+|---|---|
+| X | 1 |
+| O | -1 |
+| vazio (b) | 0 |
