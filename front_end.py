@@ -99,7 +99,7 @@ def jogar():
     nome_modelo, modelo = escolher_modelo()
 
     tabuleiro = [0] * 9
-    jogador = 1       # X comeca
+    jogador = 1
     total   = 0
     acertos = 0
     erros   = 0
@@ -112,7 +112,6 @@ def jogar():
     print("=" * 48)
 
     while True:
-        # --- Jogada ---
         if jogador == 1:
             print("\nSua vez (X):")
             pos = jogada_humano(tabuleiro)
@@ -123,7 +122,6 @@ def jogar():
         tabuleiro[pos] = jogador
         total += 1
 
-        # --- Estado real e predicao da IA ---
         real = estado_real(tabuleiro)
         pred = classificar(modelo, tabuleiro)
 
@@ -138,9 +136,6 @@ def jogar():
         print(f"   IA classificou : {CLASSES[pred]}  [{'ACERTO' if acertou else 'ERRO'}]")
         print(f"   Acuracia IA    : {acertos}/{total}  ({acertos / total * 100:.1f}%)")
 
-        # --- Decisao de continuidade ---
-
-        # Caso 1: IA detectou fim incorretamente (falso positivo) — jogo continua
         if pred != 0 and real == 0:
             print()
             print("   >> IA detectou fim de jogo incorretamente.")
@@ -149,9 +144,7 @@ def jogar():
             jogador = -jogador
             continue
 
-        # Caso 2: jogo realmente acabou
         if real != 0:
-            # Sub-caso: IA nao detectou o fim (falso negativo)
             if pred == 0:
                 print()
                 print("   >> IA nao detectou o fim de jogo.")
@@ -168,7 +161,6 @@ def jogar():
                 print("   RESULTADO: EMPATE!")
             break
 
-        # Caso 3: tabuleiro cheio mas IA nao detectou (seguranca)
         if 0 not in tabuleiro:
             print()
             print("   >> Tabuleiro cheio — IA ainda dizia 'Tem jogo'. Encerrando.")

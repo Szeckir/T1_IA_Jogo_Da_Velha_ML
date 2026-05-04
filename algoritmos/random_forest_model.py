@@ -13,13 +13,11 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from project_paths import DATASET_DIR, MODELS_DIR
 
-# Carregar dados
 X_train = pd.read_csv(DATASET_DIR / 'X_train.csv')
 X_test  = pd.read_csv(DATASET_DIR / 'X_test.csv')
 y_train = pd.read_csv(DATASET_DIR / 'y_train.csv').values.ravel()
 y_test  = pd.read_csv(DATASET_DIR / 'y_test.csv').values.ravel()
 
-# Grid de hiperparâmetros
 param_grid = {
     'n_estimators':      [50, 100, 200],
     'criterion':         ['gini', 'entropy'],
@@ -27,7 +25,6 @@ param_grid = {
     'min_samples_split': [2, 5],
 }
 
-# GridSearchCV com validação cruzada 5-fold
 grid = GridSearchCV(
     RandomForestClassifier(random_state=42),
     param_grid,
@@ -41,7 +38,6 @@ grid.fit(X_train, y_train)
 print(f"\nMelhores hiperparâmetros: {grid.best_params_}")
 print(f"Melhor acurácia (CV): {grid.best_score_:.4f}")
 
-# Avaliação no conjunto de teste
 y_pred = grid.predict(X_test)
 print(f"\nAcurácia no teste: {accuracy_score(y_test, y_pred):.4f}")
 print("\nRelatório de classificação:")
@@ -50,7 +46,6 @@ print(classification_report(y_test, y_pred,
 print("Matriz de confusão:")
 print(confusion_matrix(y_test, y_pred))
 
-# Salvar modelo
 MODELS_DIR.mkdir(exist_ok=True)
 with open(MODELS_DIR / 'random_forest_model.pkl', 'wb') as f:
     pickle.dump(grid.best_estimator_, f)

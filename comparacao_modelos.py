@@ -53,7 +53,6 @@ print(f"\nMelhor modelo por F1-Score: {melhor} ({df.loc[melhor, 'F1-Score']:.4f}
 RESULTS_DIR.mkdir(exist_ok=True)
 df.to_csv(RESULTS_DIR / 'comparacao_modelos.csv', float_format='%.4f')
 
-# --- Gráfico de barras: comparação de métricas ---
 metricas = ['Acurácia', 'Precision', 'Recall', 'F1-Score']
 n_modelos = len(df)
 x = np.arange(len(metricas))
@@ -72,10 +71,7 @@ ax.set_xticklabels(metricas)
 ax.legend(loc='lower right')
 ax.grid(axis='y', alpha=0.3)
 plt.tight_layout()
-plt.savefig(RESULTS_DIR / 'comparacao_metricas.png', dpi=150)
-plt.show()
 
-# --- Matrizes de confusão ---
 n = len(predicoes)
 fig, axes = plt.subplots(1, n, figsize=(5 * n, 5))
 if n == 1:
@@ -89,8 +85,6 @@ for ax, (nome, y_pred) in zip(axes, predicoes.items()):
 
 plt.suptitle('Matrizes de Confusão — Conjunto de Teste', fontsize=14, y=1.02)
 plt.tight_layout()
-plt.savefig(RESULTS_DIR / 'matrizes_confusao.png', dpi=150, bbox_inches='tight')
-plt.show()
 
 print("\nArquivos salvos em results/:")
 print("  comparacao_modelos.csv")

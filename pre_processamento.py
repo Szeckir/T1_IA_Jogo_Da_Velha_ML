@@ -2,7 +2,6 @@ import pandas as pd
 
 from project_paths import DATASET_DIR, RAW_DATA_FILE
 
-# Nomes das colunas conforme a posição no tabuleiro 3x3
 colunas = [
     'canto_superior_esquerdo', 'canto_superior_centro', 'canto_superior_direito',
     'meio_esquerdo', 'meio_centro', 'meio_direito',
@@ -29,20 +28,16 @@ def identificar_vitoria(row):
         return 'Empate'
     return 'Tem jogo'
 
-# Aplicar a função para criar a nova coluna de classe
 df['target'] = df.apply(identificar_vitoria, axis=1)
 
-# Mapear o tabuleiro
 mapeamento_tabuleiro = {'x': 1, 'o': -1, 'b': 0}
-for col in colunas[:-1]: # Todas exceto a antiga 'class'
+for col in colunas[:-1]:
     df[col] = df[col].map(mapeamento_tabuleiro)
 
-# Mapear as classes (Labels)
 mapeamento_alvo = {
     'X venceu': 1,
     'O venceu': 2,
     'Empate': 3
-    # 'Tem jogo' será o 0 mais tarde
 }
 df['target_num'] = df['target'].map(mapeamento_alvo)
 
@@ -51,20 +46,12 @@ print(df['target'].value_counts())
 import random
 
 def gerar_amostras_empate(n=200):
-    # O dataset original contém apenas 16 empates reais, insuficiente para balancear.
-    # Esta função gera tabuleiros sintéticos de empate para atingir n amostras.
     amostras = []
     while len(amostras) < n:
-        # Um tabuleiro de empate sempre tem 9 casas preenchidas: 5 jogadas de 'x' e 4 de 'o'
-        # (x sempre começa, logo faz uma jogada a mais)
         tabuleiro = ['x'] * 5 + ['o'] * 4
-        # Embaralha para simular distribuições aleatórias de jogadas no tabuleiro
         random.shuffle(tabuleiro)
-        # Converte para pd.Series no mesmo formato esperado por identificar_vitoria
         row_temp = pd.Series(tabuleiro + ['negative'], index=colunas)
-        # Só aceita o tabuleiro se nenhum jogador venceu (empate de fato)
         if identificar_vitoria(row_temp) == 'Empate':
-            # Converte os símbolos para valores numéricos (x→1, o→-1) e adiciona a classe 3
             tab_num = [mapeamento_tabuleiro[c] for c in tabuleiro]
             amostras.append(tab_num + [3])
     return pd.DataFrame(amostras, columns=colunas[:-1] + ['target_num'])
@@ -72,7 +59,6 @@ def gerar_amostras_empate(n=200):
 def gerar_amostras_tem_jogo(n=200):
     amostras_tem_jogo = []
     while len(amostras_tem_jogo) < n:
-        # Gera um tabuleiro com número aleatório de jogadas (1 a 7)
         num_jogadas = random.randint(1, 7)
         tabuleiro = ['b'] * 9
         posicoes = list(range(9))
@@ -81,7 +67,6 @@ def gerar_amostras_tem_jogo(n=200):
         for i in range(num_jogadas):
             tabuleiro[posicoes[i]] = 'x' if i % 2 == 0 else 'o'
             
-        # Criar um DataFrame temporário para usar a função de checagem
         row_temp = pd.Series(tabuleiro + ['negative'], index=colunas)
         if identificar_vitoria(row_temp) == 'Tem jogo':
             tab_num = [mapeamento_tabuleiro[c] for c in tabuleiro]
@@ -89,19 +74,14 @@ def gerar_amostras_tem_jogo(n=200):
             
     return pd.DataFrame(amostras_tem_jogo, columns=colunas[:-1] + ['target_num'])
 
-# 1. Separar as classes e fazer o shuffle
 df_x = df[df['target_num'] == 1].sample(n=200, random_state=42)
 df_o = df[df['target_num'] == 2].sample(n=200, random_state=42)
 df_empate = gerar_amostras_empate(200)
 
-# 2. Gerar as amostras de "Tem jogo"
 df_tem_jogo = gerar_amostras_tem_jogo(200)
 
-# 3. Concatenar tudo no dataset final
 df_final = pd.concat([df_x, df_o, df_empate, df_tem_jogo], ignore_index=True)
 
-# 4. Salvar para usar nos modelos
-# Remover as colunas de texto e ficar só com as numéricas
 df_final = df_final[colunas[:-1] + ['target_num']]
 DATASET_DIR.mkdir(exist_ok=True)
 df_final.to_csv(DATASET_DIR / 'dataset_processado.csv', index=False)
